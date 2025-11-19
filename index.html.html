@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencari Ruang Kampus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-up {
+            animation: slideUp 0.4s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+<style id="toastStyles-minimal">
+#toastContainer{position:fixed;top:16px;right:16px;display:flex;flex-direction:column;gap:10px;z-index:9999;pointer-events:none}
+.toast{min-width:260px;max-width:360px;padding:12px 14px;border-radius:12px;background:#1f2937;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.2);display:grid;grid-template-columns:1fr auto;align-items:start;gap:8px 12px;pointer-events:auto;opacity:0;transform:translateY(-8px)}
+.toast__title{font-weight:700;font-size:14px;line-height:1.2}
+.toast__msg{grid-column:1 / -1;font-size:13px;opacity:.95}
+.toast__action,.toast__close{background:transparent;border:0;color:inherit;cursor:pointer;font-weight:600;padding:0}
+.toast__action{text-decoration:underline}
+.toast__close{opacity:.8}
+.toast__close:hover{opacity:1}
+.toast--success{background:#065f46}.toast--error{background:#7f1d1d}.toast--info{background:#1e3a8a}.toast--warning{background:#78350f}
+@keyframes toast-in{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toast-out{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-6px) scale(.98)}}
+.toast--enter{animation:toast-in .22s ease-out forwards}.toast--exit{animation:toast-out .18s ease-in forwards}
+</style>
+<div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+
+
+
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen font-sans">
+    <header class="bg-white shadow-lg border-b-4 border-blue-500">
+        <div class="container mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2 md:space-x-3">
+                    <div class="flex items-center space-x-2 md:space-x-3">
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-blue-600 rounded-lg flex items-center justify-center relative">
+                            <svg class="w-5 h-5 md:w-7 md:h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm0 2.5l6 6V19h-2v-6H8v6H6v-7.5l6-6z"/>
+                            </svg>
+                            <div class="absolute -top-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg class="w-2 h-2 md:w-2.5 md:h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="hidden sm:block">
+                            <h1 class="text-lg md:text-xl font-bold text-gray-800 leading-tight">PENCARI RUANG</h1>
+                            <p class="text-xs md:text-sm text-gray-600 font-medium leading-tight">KAMPUS</p>
+                        </div>
+                        <div class="block sm:hidden">
+                            <h1 class="text-base font-bold text-gray-800 leading-tight">PRK</h1>
+                        </div>
+                    </div>
+                </div>
+                
+
+                
+                <div id="userInfo" style="display: none;" class="md:flex items-center space-x-2 lg:space-x-4">
+                    <span class="text-gray-600 text-sm lg:text-base hidden lg:block">Selamat datang, <span id="userName" class="font-semibold"></span></span>
+                    <button onclick="showProfile()" class="bg-purple-500 hover:bg-purple-600 text-white px-2 lg:px-4 py-2 rounded-lg transition-colors text-xs lg:text-sm">
+                        Profile
+                    </button>
+                    <button onclick="showMyBookings()" class="bg-green-500 hover:bg-green-600 text-white px-2 lg:px-4 py-2 rounded-lg transition-colors text-xs lg:text-sm">
+                        Booking
+                    </button>
+                    <button onclick="showContactAdmin()" class="bg-orange-500 hover:bg-orange-600 text-white px-2 lg:px-4 py-2 rounded-lg transition-colors text-xs lg:text-sm">
+                        Admin
+                    </button>
+                    <button onclick="showDashboard()" class="bg-blue-500 hover:bg-blue-600 text-white px-2 lg:px-4 py-2 rounded-lg transition-colors text-xs lg:text-sm">
+                        Cari
+                    </button>
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-2 lg:px-4 py-2 rounded-lg transition-colors text-xs lg:text-sm">
+                        Keluar
+                    </button>
+                </div>
+            </div>
+            
+
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 md:px-6 py-4 md:py-8">
+        <div id="loginPage" class="max-w-md mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 fade-in">
+                <div class="flex flex-col items-center mb-6">
+                    <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center relative mb-3">
+                        <svg class="w-9 h-9 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm0 2.5l6 6V19h-2v-6H8v6H6v-7.5l6-6z"/>
+                        </svg>
+                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h1 class="text-2xl font-bold text-gray-800 mb-1">PRK</h1>
+                        <p class="text-sm text-blue-600 font-medium">Pencari Ruang Kampus</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Masuk ke Akun</h2>
+                    <p class="text-gray-600">Silakan masuk untuk mencari ruang kampus</p>
+                </div>
+
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email/NIM</label>
+                        <input type="text" id="loginEmail" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                               placeholder="Masukkan email atau NIM">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="loginPassword" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                               placeholder="Masukkan password">
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Masuk
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center space-y-3">
+                    <button onclick="showForgotPassword()" class="text-blue-600 hover:text-blue-800 text-sm">
+                        Lupa Password?
+                    </button>
+                    <div class="border-t pt-4">
+                        <p class="text-gray-600 text-sm mb-3">Belum punya akun?</p>
+                        <button onclick="showRegister()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                            Daftar Sekarang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="registerPage" class="max-w-md mx-auto hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-8 fade-in">
+                <div class="flex justify-start mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center relative">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm0 2.5l6 6V19h-2v-6H8v6H6v-7.5l6-6z"/>
+                            </svg>
+                            <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800 leading-tight">PRK</h1>
+                            <p class="text-xs text-blue-600 font-medium leading-tight">Pencari Ruang Kampus</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Daftar Akun Baru</h2>
+                    <p class="text-gray-600">Buat akun untuk menggunakan layanan</p>
+                </div>
+
+                <form id="registerForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                        <input type="text" id="registerName" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                               placeholder="Masukkan nama lengkap">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email/NIM</label>
+                        <input type="text" id="registerEmail" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                               placeholder="Masukkan email atau NIM">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="registerPassword" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                               placeholder="Masukkan password">
+                    </div>
+
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Daftar
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <button onclick="showLogin()" class="text-blue-600 hover:text-blue-800 text-sm">
+                        Sudah punya akun? Masuk di sini
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="profilePage" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-8 fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Profile Saya</h2>
+                    <button onclick="editProfile()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Edit Profile
+                    </button>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Informasi Pribadi</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Nama Lengkap</label>
+                                <p id="profileName" class="text-gray-800 font-medium">-</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Email/NIM</label>
+                                <p id="profileEmail" class="text-gray-800 font-medium">-</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">No. Telepon</label>
+                                <p id="profilePhone" class="text-gray-800 font-medium">-</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Program Studi</label>
+                                <p id="profileMajor" class="text-gray-800 font-medium">-</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Semester</label>
+                                <p id="profileSemester" class="text-gray-800 font-medium">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Statistik Booking</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-blue-600" id="totalBookings">0</div>
+                                <div class="text-sm text-blue-600">Total Booking</div>
+                            </div>
+                            
+                            <div class="bg-green-50 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-green-600" id="activeBookings">0</div>
+                                <div class="text-sm text-green-600">Booking Aktif</div>
+                            </div>
+                            
+                            <div class="bg-yellow-50 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-yellow-600" id="completedBookings">0</div>
+                                <div class="text-sm text-yellow-600">Selesai</div>
+                            </div>
+                            
+                            <div class="bg-red-50 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-red-600" id="cancelledBookings">0</div>
+                                <div class="text-sm text-red-600">Dibatalkan</div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium text-gray-800 mb-3">Booking Terbaru</h4>
+                            <div id="recentBookings" class="space-y-2">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="contactAdminPage" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 fade-in">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Hubungi Admin</h2>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Pilih Jurusan:</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="showAdminContact('Sistem Komputer')" class="p-4 border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M20,18C20.5,18 21,17.5 21,17V7C21,6.5 20.5,6 20,6H4C3.5,6 3,6.5 3,7V17C3,17.5 3.5,18 4,18H20M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.11,4 20,4Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Sistem Komputer</h3>
+                                    <p class="text-sm text-gray-600">Admin SK</p>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="showAdminContact('Teknik Informatika')" class="p-4 border-2 border-green-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all text-left">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Teknik Informatika</h3>
+                                    <p class="text-sm text-gray-600">Admin TI</p>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="showAdminContact('Sistem Informasi')" class="p-4 border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Sistem Informasi</h3>
+                                    <p class="text-sm text-gray-600">Admin SI</p>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="showAdminContact('Komputerisasi Akuntansi')" class="p-4 border-2 border-yellow-200 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition-all text-left">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M7,2V4H17V2H19V4H20A2,2 0 0,1 22,6V20A2,2 0 0,1 20,22H4A2,2 0 0,1 2,20V6A2,2 0 0,1 4,4H5V2H7M4,8V20H20V8H4M6,10H8V12H6V10M10,10H12V12H10V10M14,10H16V12H14V10M18,10H20V12H18V10M6,14H8V16H6V14M10,14H12V16H10V14M14,14H16V16H14V14M6,18H8V20H6V18M10,18H12V20H10V18Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Komputerisasi Akuntansi</h3>
+                                    <p class="text-sm text-gray-600">Admin KA</p>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="showAdminContact('Manajemen Informatika')" class="p-4 border-2 border-red-200 rounded-lg hover:border-red-500 hover:bg-red-50 transition-all text-left">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M16,6L18.29,8.29L13.41,13.17L9.41,9.17L2,16.59L3.41,18L9.41,12L13.41,16L19.71,9.71L22,12V6H16Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Manajemen Informatika</h3>
+                                    <p class="text-sm text-gray-600">Admin MI</p>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="showAdminContact('Teknik Komputer')" class="p-4 border-2 border-indigo-200 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-all text-left">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M17,17H7V7H17M21,11V9H19V7C19,5.89 18.1,5 17,5H15V3H13V5H11V3H9V5H7C5.89,5 5,5.89 5,7V9H3V11H5V13H3V15H5V17C5,18.1 5.89,19 7,19H9V21H11V19H13V21H15V19H17C18.1,19 19,18.1 19,17V15H21V13H19V11M13,13H11V11H13V13Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Teknik Komputer</h3>
+                                    <p class="text-sm text-gray-600">Admin TK</p>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="adminContactDetails" class="hidden">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4" id="adminDepartment"></h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Nama Admin</p>
+                                    <p class="font-medium text-gray-800" id="adminName"></p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">No. Telepon</p>
+                                    <p class="font-medium text-gray-800" id="adminPhone"></p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.11,4 20,4Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Email</p>
+                                    <p class="font-medium text-gray-800" id="adminEmail"></p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Jam Kerja</p>
+                                    <p class="font-medium text-gray-800" id="adminWorkHours"></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                            <button onclick="contactViaWhatsApp()" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17.472,14.382c-0.297-0.149-1.758-0.867-2.03-0.967c-0.273-0.099-0.471-0.148-0.670,0.15c-0.197,0.297-0.767,0.966-0.94,1.164c-0.173,0.199-0.347,0.223-0.644,0.075c-0.297-0.15-1.255-0.463-2.39-1.475c-0.883-0.788-1.48-1.761-1.653-2.059c-0.173-0.297-0.018-0.458,0.13-0.606c0.134-0.133,0.298-0.347,0.446-0.52c0.149-0.174,0.198-0.298,0.298-0.497c0.099-0.198,0.05-0.371-0.025-0.52C10.612,9.420,9.53,7.14,9.5,6.199c-0.031-0.943-0.218-0.815-0.218-0.815S8.755,5.384,8.458,5.384c-0.297,0-0.784,0.297-1.194,0.744c-0.41,0.446-1.566,1.529-1.566,3.729c0,2.199,1.604,4.323,1.827,4.622c0.223,0.298,3.167,4.83,7.669,6.775c1.072,0.463,1.910,0.739,2.562,0.947c1.076,0.342,2.057,0.294,2.832,0.178c0.864-0.129,2.665-1.090,3.040-2.143c0.375-1.052,0.375-1.954,0.262-2.143C17.736,14.382,17.769,14.531,17.472,14.382z"/>
+                                    <path d="M12.057,2C6.501,2,2,6.501,2,12.057c0,1.784,0.466,3.463,1.281,4.918L2.05,22l5.197-1.364c1.398,0.766,2.989,1.171,4.81,1.171c5.556,0,10.057-4.501,10.057-10.057S17.613,2,12.057,2z M12.057,20.807c-1.621,0-3.208-0.434-4.592-1.255l-0.329-0.195l-3.411,0.895l0.912-3.331l-0.214-0.341c-0.903-1.438-1.381-3.104-1.381-4.823c0-4.848,3.946-8.794,8.794-8.794s8.794,3.946,8.794,8.794S16.905,20.807,12.057,20.807z"/>
+                                </svg>
+                                <span>WhatsApp</span>
+                            </button>
+                            <button onclick="contactViaEmail()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.11,4 20,4Z"/>
+                                </svg>
+                                <span>Email</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="myBookingsPage" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Booking Saya</h2>
+                    <span id="bookingCount" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                        0 Booking Aktif
+                    </span>
+                </div>
+                
+                <div id="bookingsList" class="space-y-4">
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-800 mb-2">Belum Ada Booking</h3>
+                        <p class="text-gray-600 mb-4">Anda belum memiliki booking ruangan aktif</p>
+                        <button onclick="showDashboard()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                            Mulai Booking Ruang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboardPage" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6 md:mb-8 fade-in">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">Cari Ruang Kosong</h2>
+                
+                <form id="searchForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Tanggal</label>
+                        <select id="searchDay" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Pilih Tanggal</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Jam</label>
+                        <select id="searchTime" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Pilih Jam</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                            Cari Ruang
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="searchResults" class="hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-8 slide-up">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Hasil Pencarian</h3>
+                    <div id="roomList" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <div id="noResults" class="hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-8 text-center slide-up">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Ruangan Penuh</h3>
+                    <p class="text-gray-600">Tidak ada ruangan yang tersedia pada waktu yang dipilih. Silakan coba waktu lain.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 fade-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Konfirmasi Booking</h3>
+                
+                <div id="bookingDetails" class="space-y-4 mb-6">
+                    </div>
+
+                <div class="flex space-x-4">
+                    <button onclick="closeBookingModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button onclick="confirmBooking()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Konfirmasi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="editProfileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 fade-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Edit Profile</h3>
+                
+                <form id="editProfileForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                        <input type="text" id="editName" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon</label>
+                        <input type="tel" id="editPhone" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                               placeholder="Contoh: 08123456789">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Program Studi</label>
+                        <select id="editMajor" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Pilih Program Studi</option>
+                            <option value="Sistem Komputer">Sistem Komputer</option>
+                            <option value="Teknik Informatika">Teknik Informatika</option>
+                            <option value="Sistem Informasi">Sistem Informasi</option>
+                            <option value="Komputerisasi Akuntansi">Komputerisasi Akuntansi</option>
+                            <option value="Manajemen Informatika">Manajemen Informatika</option>
+                            <option value="Teknik Komputer">Teknik Komputer</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                        <select id="editSemester" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Pilih Semester</option>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                            <option value="7">Semester 7</option>
+                            <option value="8">Semester 8</option>
+                        </select>
+                    </div>
+                </form>
+
+                <div class="flex space-x-4 mt-6">
+                    <button onclick="closeEditProfileModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button onclick="saveProfile()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 fade-in">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Booking Berhasil!</h3>
+                    <p class="text-gray-600 mb-6">Ruangan telah berhasil dibooking. Silakan datang tepat waktu.</p>
+                    <button onclick="closeSuccessModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Sample room data - Gedung D
+        const rooms = [
+            // Lantai 1
+            { id: 1, name: 'D1.1', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            { id: 2, name: 'D1.2', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            { id: 3, name: 'D1.3', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            { id: 4, name: 'D1.4', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            // Lantai 2
+            { id: 5, name: 'D2.1', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            { id: 6, name: 'D2.2', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            { id: 7, name: 'D2.3', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            { id: 8, name: 'D2.4', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            // Lantai 3
+            { id: 9, name: 'D3.1', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            { id: 10, name: 'D3.2', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            { id: 11, name: 'D3.3', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true },
+            { id: 12, name: 'D3.4', capacity: 40, facilities: ['Proyektor', 'AC', 'Whiteboard'], available: true }
+        ];
+
+        let currentUser = null;
+        let selectedRoom = null;
+        let searchCriteria = {};
+        let userBookings = [];
+
+        // Time slots for different days
+        const timeSlots = {
+            'senin': ['08:00-10:30', '10:30-12:50', '13:50-15:40'],
+            'selasa': ['08:00-09:40', '09:40-12:50', '13:50-15:40'],
+            'rabu': ['08:00-10:30', '10:30-12:50', '13:50-15:40'],
+            'kamis': ['08:00-09:40', '09:40-12:50', '13:50-15:40'],
+            'jumat': ['08:00-10:30', '10:30-12:50', '13:50-15:40'],
+            'sabtu': ['08:00-09:40', '09:40-12:50', '13:50-15:40']
+        };
+
+        // Check login status on page load
+        window.onload = function() {
+    document.getElementById('userInfo').style.display = 'none'; // sembunyikan navigasi saat awal load
+    document.getElementById('userInfo').classList.add('hidden'); // sembunyikan navigasi saat awal load
+    document.getElementById('userInfo').classList.add('hidden'); // sembunyikan saat pertama kali load
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                loadUserBookings();
+                showDashboard();
+            }
+            populateDateOptions();
+        };
+
+        // Populate date options for the next 30 days
+        function populateDateOptions() {
+            const daySelect = document.getElementById('searchDay');
+            const today = new Date();
+            
+            for (let i = 0; i < 30; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                
+                // Skip Sundays
+                if (date.getDay() === 0) continue;
+                
+                const dayNames = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                
+                const dayName = dayNames[date.getDay()];
+                const dateStr = date.getDate();
+                const monthStr = monthNames[date.getMonth()];
+                const yearStr = date.getFullYear();
+                
+                const option = document.createElement('option');
+                option.value = `${dayName}-${date.toISOString().split('T')[0]}`;
+                option.textContent = `${dayName.charAt(0).toUpperCase() + dayName.slice(1)}, ${dateStr} ${monthStr} ${yearStr}`;
+                daySelect.appendChild(option);
+            }
+        }
+
+        // Update time slots based on selected day
+        function updateTimeSlots() {
+            const daySelect = document.getElementById('searchDay');
+            const timeSelect = document.getElementById('searchTime');
+            
+            // Clear existing options
+            timeSelect.innerHTML = '<option value="">Pilih Jam</option>';
+            
+            if (daySelect.value) {
+                const dayName = daySelect.value.split('-')[0];
+                const slots = timeSlots[dayName] || [];
+                
+                slots.forEach(slot => {
+                    const option = document.createElement('option');
+                    option.value = slot;
+                    option.textContent = slot;
+                    timeSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Add event listener for day selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const daySelect = document.getElementById('searchDay');
+            if (daySelect) {
+                daySelect.addEventListener('change', updateTimeSlots);
+            }
+        });
+
+        // Load user bookings from localStorage
+        function loadUserBookings() {
+            const savedBookings = localStorage.getItem(`bookings_${currentUser.email}`);
+            if (savedBookings) {
+                userBookings = JSON.parse(savedBookings);
+            }
+        }
+
+        // Save user bookings to localStorage
+        function saveUserBookings() {
+            localStorage.setItem(`bookings_${currentUser.email}`, JSON.stringify(userBookings));
+        }
+
+        // Email/NIM validation function
+        function validateEmailOrNIM(input) {
+            // Check if it's a valid email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            // Check if it's a valid NIM format (assuming NIM is numeric and 8-12 digits)
+            const nimRegex = /^\d{8,12}$/;
+            
+            return emailRegex.test(input) || nimRegex.test(input);
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            // Validate email/NIM format
+            if (!validateEmailOrNIM(email)) {
+                alert('Format login tidak valid! Gunakan email yang valid (contoh: user@email.com) atau NIM yang valid (8-12 digit angka).');
+                return;
+            }
+
+            // Simple validation (in real app, this would be server-side)
+            if (email && password) {
+                currentUser = { email: email, name: email.includes('@') ? email.split('@')[0] : email };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                loadUserBookings();
+                showDashboard();
+            }
+        });
+
+        // Register form handler
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+
+            // Validate email/NIM format
+            if (!validateEmailOrNIM(email)) {
+                alert('Format email/NIM tidak valid! Gunakan email yang valid (contoh: user@email.com) atau NIM yang valid (8-12 digit angka).');
+                return;
+            }
+
+            if (name && email && password) {
+                currentUser = { email: email, name: name };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                loadUserBookings();
+                showDashboard();
+            }
+        });
+
+        // Search form handler
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const dayValue = document.getElementById('searchDay').value;
+            const time = document.getElementById('searchTime').value;
+
+            if (dayValue && time) {
+                const [dayName, dateStr] = dayValue.split('-');
+                searchCriteria = { 
+                    day: dayName, 
+                    date: dateStr,
+                    time: time,
+                    displayDate: document.getElementById('searchDay').options[document.getElementById('searchDay').selectedIndex].text
+                };
+                searchRooms();
+            }
+        });
+
+        function showLogin() {
+    document.getElementById('userInfo').style.display = 'none'; // pastikan header tersembunyi di login
+    document.getElementById('userInfo').classList.add('hidden'); // pastikan navigasi tersembunyi
+    document.getElementById('userInfo').classList.add('hidden'); // sembunyikan navigasi di halaman login
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.remove('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
+        }
+
+
+
+        function showDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('profilePage').classList.add('hidden');
+            document.getElementById('myBookingsPage').classList.add('hidden');
+            document.getElementById('contactAdminPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.remove('hidden');
+            document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('userName').textContent = currentUser.name;
+            populateDateOptions();
+        }
+
+        function showProfile() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
+            document.getElementById('myBookingsPage').classList.add('hidden');
+            document.getElementById('contactAdminPage').classList.add('hidden');
+            document.getElementById('profilePage').classList.remove('hidden');
+            document.getElementById('userInfo').style.display = 'flex';
+            loadProfileData();
+        }
+
+        function showMyBookings() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('profilePage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
+            document.getElementById('contactAdminPage').classList.add('hidden');
+            document.getElementById('myBookingsPage').classList.remove('hidden');
+            document.getElementById('userInfo').style.display = 'flex';
+            displayUserBookings();
+        }
+
+        function showContactAdmin() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('profilePage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
+            document.getElementById('myBookingsPage').classList.add('hidden');
+            document.getElementById('contactAdminPage').classList.remove('hidden');
+            document.getElementById('userInfo').style.display = 'flex';
+            // Reset admin contact details
+            document.getElementById('adminContactDetails').classList.add('hidden');
+        }
+
+        // Admin contact data
+        const adminContacts = {
+            'Sistem Komputer': {
+                name: 'Bahij Ammar D.A S.Kom M.T',
+                phone: '081274225474',
+                email: 'admin.sk@kampus.ac.id',
+                workHours: 'Senin-Jumat, 08:00-16:00'
+            },
+            'Teknik Informatika': {
+                name: 'Bahij Ammar D.A S.Kom M.T',
+                phone: '081274225474',
+                email: 'admin.ti@kampus.ac.id',
+                workHours: 'Senin-Jumat, 08:00-16:00'
+            },
+            'Sistem Informasi': {
+                name: 'Bahij Ammar D.A S.Kom M.T',
+                phone: '081274225474',
+                email: 'admin.si@kampus.ac.id',
+                workHours: 'Senin-Jumat, 08:00-16:00'
+            },
+            'Komputerisasi Akuntansi': {
+                name: 'Bahij Ammar D.A S.Kom M.T',
+                phone: '081274225474',
+                email: 'admin.ka@kampus.ac.id',
+                workHours: 'Senin-Jumat, 08:00-16:00'
+            },
+            'Manajemen Informatika': {
+                name: 'Bahij Ammar D.A S.Kom M.T',
+                phone: '081274225474',
+                email: 'admin.mi@kampus.ac.id',
+                workHours: 'Senin-Jumat, 08:00-16:00'
+            },
+            'Teknik Komputer': {
+                name: 'Bahij Ammar D.A S.Kom M.T',
+                phone: '081274225474',
+                email: 'admin.tk@kampus.ac.id',
+                workHours: 'Senin-Jumat, 08:00-16:00'
+            }
+        };
+
+        let selectedAdmin = null;
+
+        function showAdminContact(department) {
+            selectedAdmin = adminContacts[department];
+            
+            document.getElementById('adminDepartment').textContent = `Admin ${department}`;
+            document.getElementById('adminName').textContent = selectedAdmin.name;
+            document.getElementById('adminPhone').textContent = selectedAdmin.phone;
+            document.getElementById('adminEmail').textContent = selectedAdmin.email;
+            document.getElementById('adminWorkHours').textContent = selectedAdmin.workHours;
+            
+            document.getElementById('adminContactDetails').classList.remove('hidden');
+        }
+
+        function contactViaWhatsApp() {
+            if (selectedAdmin) {
+                const message = encodeURIComponent(`Halo ${selectedAdmin.name}, saya ${currentUser.name} ingin menghubungi admin terkait ruang kampus.`);
+                const whatsappUrl = `https://wa.me/${selectedAdmin.phone.replace(/\D/g, '')}?text=${message}`;
+                window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            }
+        }
+
+        function contactViaEmail() {
+            if (selectedAdmin) {
+                const subject = encodeURIComponent('Pertanyaan Terkait Ruang Kampus');
+                const body = encodeURIComponent(`Halo ${selectedAdmin.name},\n\nSaya ${currentUser.name} ingin menghubungi admin terkait ruang kampus.\n\nTerima kasih.`);
+                const emailUrl = `mailto:${selectedAdmin.email}?subject=${subject}&body=${body}`;
+                window.open(emailUrl, '_blank', 'noopener,noreferrer');
+            }
+        }
+
+        function loadProfileData() {
+            // Load profile data from localStorage
+            const profileData = JSON.parse(localStorage.getItem(`profile_${currentUser.email}`)) || {};
+            
+            document.getElementById('profileName').textContent = currentUser.name || '-';
+            document.getElementById('profileEmail').textContent = currentUser.email || '-';
+            document.getElementById('profilePhone').textContent = profileData.phone || '-';
+            document.getElementById('profileMajor').textContent = profileData.major || '-';
+            document.getElementById('profileSemester').textContent = profileData.semester ? `Semester ${profileData.semester}` : '-';
+            
+            // Update booking statistics
+            const totalBookings = userBookings.length;
+            const activeBookings = userBookings.filter(b => b.status === 'active').length;
+            const completedBookings = userBookings.filter(b => b.status === 'completed').length;
+            const cancelledBookings = userBookings.filter(b => b.status === 'cancelled').length;
+            
+            document.getElementById('totalBookings').textContent = totalBookings;
+            document.getElementById('activeBookings').textContent = activeBookings;
+            document.getElementById('completedBookings').textContent = completedBookings;
+            document.getElementById('cancelledBookings').textContent = cancelledBookings;
+            
+            // Show recent bookings
+            const recentBookings = userBookings.slice(-3).reverse();
+            const recentBookingsContainer = document.getElementById('recentBookings');
+            
+            if (recentBookings.length === 0) {
+                recentBookingsContainer.innerHTML = '<p class="text-gray-500 text-sm">Belum ada booking</p>';
+            } else {
+                recentBookingsContainer.innerHTML = '';
+                recentBookings.forEach(booking => {
+                    const bookingElement = document.createElement('div');
+                    bookingElement.className = 'flex justify-between items-center p-2 bg-gray-50 rounded text-sm';
+                    bookingElement.innerHTML = `
+                        <span class="font-medium">${booking.roomName}</span>
+                        <span class="text-gray-600">${booking.day}</span>
+                    `;
+                    recentBookingsContainer.appendChild(bookingElement);
+                });
+            }
+        }
+
+        function editProfile() {
+            const profileData = JSON.parse(localStorage.getItem(`profile_${currentUser.email}`)) || {};
+            
+            document.getElementById('editName').value = currentUser.name || '';
+            document.getElementById('editPhone').value = profileData.phone || '';
+            document.getElementById('editMajor').value = profileData.major || '';
+            document.getElementById('editSemester').value = profileData.semester || '';
+            
+            document.getElementById('editProfileModal').classList.remove('hidden');
+            document.getElementById('editProfileModal').classList.add('flex');
+        }
+
+        function closeEditProfileModal() {
+            document.getElementById('editProfileModal').classList.add('hidden');
+            document.getElementById('editProfileModal').classList.remove('flex');
+        }
+
+        function saveProfile() {
+            const name = document.getElementById('editName').value;
+            const phone = document.getElementById('editPhone').value;
+            const major = document.getElementById('editMajor').value;
+            const semester = document.getElementById('editSemester').value;
+            
+            if (name) {
+                // Update current user name
+                currentUser.name = name;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // Save profile data
+                const profileData = { phone, major, semester };
+                localStorage.setItem(`profile_${currentUser.email}`, JSON.stringify(profileData));
+                
+                closeEditProfileModal();
+                loadProfileData();
+                
+                // Update header name
+                document.getElementById('userName').textContent = currentUser.name;
+            }
+        }
+
+        function showForgotPassword() {
+            alert('Fitur lupa password akan segera tersedia. Silakan hubungi administrator.');
+        }
+
+        function displayUserBookings() {
+            const bookingsList = document.getElementById('bookingsList');
+            const bookingCount = document.getElementById('bookingCount');
+            
+            if (userBookings.length === 0) {
+                bookingsList.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-800 mb-2">Belum Ada Booking</h3>
+                        <p class="text-gray-600 mb-4">Anda belum memiliki booking ruangan aktif</p>
+                        <button onclick="showDashboard()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                            Mulai Booking Ruang
+                        </button>
+                    </div>
+                `;
+                bookingCount.textContent = '0 Booking Aktif';
+            } else {
+                bookingsList.innerHTML = '';
+                userBookings.forEach((booking, index) => {
+                    const bookingCard = document.createElement('div');
+                    bookingCard.className = 'border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow';
+                    
+                    const bookingDate = new Date(booking.bookingDate);
+                    const statusClass = booking.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+                    const statusText = booking.status === 'active' ? 'Aktif' : 'Selesai';
+                    
+                    bookingCard.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-800">${booking.roomName}</h4>
+                                <p class="text-gray-600">Booking ID: #${booking.id}</p>
+                            </div>
+                            <span class="px-3 py-1 ${statusClass} rounded-full text-sm font-medium">
+                                ${statusText}
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <p class="text-sm text-gray-600">Tanggal</p>
+                                <p class="font-medium text-gray-800">${booking.displayDate || booking.day}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Jam</p>
+                                <p class="font-medium text-gray-800">${booking.time}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Kapasitas</p>
+                                <p class="font-medium text-gray-800">${booking.capacity} orang</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Tanggal Booking</p>
+                                <p class="font-medium text-gray-800">${bookingDate.toLocaleDateString('id-ID')}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-600 mb-2">Fasilitas:</p>
+                            <div class="flex flex-wrap gap-2">
+                                ${booking.facilities.map(facility => 
+                                    `<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${facility}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        
+                        ${booking.status === 'active' ? `
+                            <button onclick="cancelBooking(${index})" 
+                                    class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+                                Batalkan Booking
+                            </button>
+                        ` : ''}
+                    `;
+                    
+                    bookingsList.appendChild(bookingCard);
+                });
+                
+                const activeBookings = userBookings.filter(booking => booking.status === 'active').length;
+                bookingCount.textContent = `${activeBookings} Booking Aktif`;
+            }
+        }
+
+        function cancelBooking(index) {
+            if (confirm('Apakah Anda yakin ingin membatalkan booking ini?')) {
+                userBookings[index].status = 'cancelled';
+                saveUserBookings();
+                displayUserBookings();
+            }
+        }
+
+        function logout() {
+    document.getElementById('userInfo').style.display = 'none'; // sembunyikan navigasi setelah logout
+    document.getElementById('userInfo').classList.add('hidden'); // sembunyikan navigasi setelah logout
+            currentUser = null;
+            userBookings = [];
+            localStorage.removeItem('currentUser');
+            document.getElementById('userInfo').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
+            document.getElementById('profilePage').classList.add('hidden');
+            document.getElementById('myBookingsPage').classList.add('hidden');
+            document.getElementById('contactAdminPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            
+            // Reset forms
+            document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+        }
+
+        function searchRooms() {
+            // Simulate room availability (randomly make some rooms unavailable)
+            const availableRooms = rooms.filter(room => {
+                // Simulate some rooms being booked
+                return Math.random() > 0.3; // 70% chance of being available
+            });
+
+            if (availableRooms.length > 0) {
+                displayRooms(availableRooms);
+            } else {
+                showNoResults();
+            }
+        }
+
+        function displayRooms(roomList) {
+            const roomListElement = document.getElementById('roomList');
+            roomListElement.innerHTML = '';
+
+            roomList.forEach(room => {
+                // Check if room is already booked for the selected day, date and time
+                const isBooked = userBookings.some(booking => 
+                    booking.roomId === room.id && 
+                    booking.day === searchCriteria.day && 
+                    booking.date === searchCriteria.date &&
+                    booking.time === searchCriteria.time && 
+                    booking.status === 'active'
+                );
+
+                const roomCard = document.createElement('div');
+                roomCard.className = 'border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow';
+                
+                const statusClass = isBooked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
+                const statusText = isBooked ? 'Di Booking' : 'Tersedia';
+                const buttonDisabled = isBooked ? 'disabled' : '';
+                const buttonClass = isBooked ? 
+                    'w-full bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg cursor-not-allowed' : 
+                    'w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors';
+                const buttonText = isBooked ? 'Sudah Di Booking' : 'Booking Sekarang';
+                
+                roomCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800">${room.name}</h4>
+                            <p class="text-gray-600">Kapasitas: ${room.capacity} orang</p>
+                        </div>
+                        <span class="px-3 py-1 ${statusClass} rounded-full text-sm font-medium">
+                            ${statusText}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 mb-2">Fasilitas:</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${room.facilities.map(facility => 
+                                `<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${facility}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <button onclick="${isBooked ? '' : `openBookingModal(${room.id})`}" 
+                            class="${buttonClass}" ${buttonDisabled}>
+                        ${buttonText}
+                    </button>
+                `;
+                
+                roomListElement.appendChild(roomCard);
+            });
+
+            document.getElementById('searchResults').classList.remove('hidden');
+            document.getElementById('noResults').classList.add('hidden');
+        }
+
+        function showNoResults() {
+            document.getElementById('searchResults').classList.add('hidden');
+            document.getElementById('noResults').classList.remove('hidden');
+        }
+
+        function openBookingModal(roomId) {
+            selectedRoom = rooms.find(room => room.id === roomId);
+            
+            const bookingDetails = document.getElementById('bookingDetails');
+            bookingDetails.innerHTML = `
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-800 mb-2">${selectedRoom.name}</h4>
+                    <p class="text-gray-600 text-sm mb-1">Tanggal: ${searchCriteria.displayDate}</p>
+                    <p class="text-gray-600 text-sm mb-1">Jam: ${searchCriteria.time}</p>
+                    <p class="text-gray-600 text-sm mb-1">Kapasitas: ${selectedRoom.capacity} orang</p>
+                    <p class="text-gray-600 text-sm">Fasilitas: ${selectedRoom.facilities.join(', ')}</p>
+                </div>
+            `;
+            
+            document.getElementById('bookingModal').classList.remove('hidden');
+            document.getElementById('bookingModal').classList.add('flex');
+        }
+
+        function closeBookingModal() {
+            document.getElementById('bookingModal').classList.add('hidden');
+            document.getElementById('bookingModal').classList.remove('flex');
+        }
+
+        function confirmBooking() {
+            // Create booking record
+            const booking = {
+                id: Date.now().toString().slice(-6), // Simple ID generation
+                roomName: selectedRoom.name,
+                roomId: selectedRoom.id,
+                day: searchCriteria.day,
+                date: searchCriteria.date,
+                displayDate: searchCriteria.displayDate,
+                time: searchCriteria.time,
+                capacity: selectedRoom.capacity,
+                facilities: selectedRoom.facilities,
+                bookingDate: new Date().toISOString(),
+                status: 'active'
+            };
+            
+            // Add to user bookings
+            userBookings.push(booking);
+            saveUserBookings();
+            
+            // Simulate booking process
+            closeBookingModal();
+            
+            // Show success modal
+            document.getElementById('successModal').classList.remove('hidden');
+            document.getElementById('successModal').classList.add('flex');
+            
+            // Remove the booked room from available rooms (simulate real-time update)
+            const roomIndex = rooms.findIndex(room => room.id === selectedRoom.id);
+            if (roomIndex !== -1) {
+                rooms[roomIndex].available = false;
+            }
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('successModal').classList.remove('flex');
+            
+            // Refresh search results
+            if (searchCriteria.day && searchCriteria.time) {
+                searchRooms();
+            }
+        }
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
